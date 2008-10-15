@@ -32,7 +32,7 @@ start() ->
 %% @spec stop() -> ok
 %% @doc Stop the skel server.
 stop() ->
-    application:stop(skel),
+    application:stop(skel).
 
 %% @spec config(Item::atom()) -> term()
 %% @doc Retrieve the configuration value for key Item from the skel
