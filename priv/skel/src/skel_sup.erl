@@ -41,10 +41,8 @@ upgrade() ->
 %% @spec init([]) -> SupervisorTree
 %% @doc supervisor callback.
 init([]) ->
-    Ip = case os:getenv("MOCHIWEB_IP") of false -> "0.0.0.0"; Any -> Any end,   
-    WebConfig = [
-         {ip, Ip},
-                 {port, 8000},
+    WebConfig = [{ip, skel:config(listen)},
+                 {port, skel:config(http_port)},
                  {docroot, skel_deps:local_path(["priv", "www"])}],
     Web = {skel_web,
            {skel_web, start, [WebConfig]},
