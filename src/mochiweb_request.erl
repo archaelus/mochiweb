@@ -16,6 +16,7 @@
 -export([start_response/1, start_response_length/1, start_raw_response/1]).
 -export([respond/1, ok/1]).
 -export([not_found/0, not_found/1]).
+-export([redirect/1, redirect/2]).
 -export([parse_post/0, parse_qs/0]).
 -export([should_close/0, cleanup/0]).
 -export([parse_cookie/0, get_cookie_value/1]).
@@ -286,6 +287,20 @@ not_found() ->
 not_found(ExtraHeaders) ->
     respond({404, [{"Content-Type", "text/plain"} | ExtraHeaders],
              <<"Not found.">>}).
+
+%% @spec redirect(Path::string()) -> response()
+%% @doc Alias for <code>not_found(Path, [])</code>.
+redirect(Path) ->
+    redirect(Path, []).
+
+%% @spec redirect(Path::string(), ExtraHeaders::list()) -> response()
+%% @doc Alias for <code>respond({302, [{"Content-Type", "text/plain"}, {"Location", Path},
+%% | ExtraHeaders], &lt;&lt;"Found."&gt;&gt;})</code>.
+redirect(Path, ExtraHeaders) ->
+    respond({302, % using a Found instead of See Other as per compatibility note http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.3
+             [{"Content-Type", "text/plain"},
+              {"Location", Path} | ExtraHeaders],
+             <<"Found.">>}).
 
 %% @spec ok({value(), iodata()} | {value(), ioheaders(), iodata() | {file, IoDevice}}) ->
 %%           response()
