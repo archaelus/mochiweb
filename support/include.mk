@@ -41,6 +41,6 @@ $(EBIN_DIR)/%.$(EMULATOR): %.erl
 ./%.$(EMULATOR): %.erl
 	$(ERLC) $(ERLC_FLAGS) -o . $<
 
-$(DOC_DIR)/%.html: %.erl
-	$(ERL) -noshell -run edoc file $< -run init stop
-	mv *.html $(DOC_DIR)
+$(DOC_DIR)/index.html: $(EBIN_FILES_NO_DOCS)
+	$(ERL) -noshell -pa $(EBIN_DIR_ABS) -run edoc_run application "'mochiweb'" \
+               '"../"' '[{def,{vsn,"1.0"}}]'
