@@ -14,7 +14,8 @@
 -export([stop/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
 
--record(state, {last, tref}).
+-record(state, {last}).
+-define(RELOAD_INTERVAL, timer:seconds(1)).
 
 %% External API
 
@@ -38,39 +39,39 @@ stop() ->
 %% @spec init([]) -> {ok, State}
 %% @doc gen_server init, opens the server in an initial state.
 init([]) ->
-    {ok, TRef} = timer:send_interval(timer:seconds(1), doit),
-    {ok, #state{last = stamp(), tref = TRef}}.
+    {ok, #state{last = stamp()}, ?RELOAD_INTERVAL}.
 
 %% @spec handle_call(Args, From, State) -> tuple()
 %% @doc gen_server callback.
 handle_call(stop, _From, State) ->
     {stop, shutdown, stopped, State};
 handle_call(_Req, _From, State) ->
-    {reply, {error, badrequest}, State}.
+    {reply, {error, badrequest}, State, ?RELOAD_INTERVAL}.
 
 %% @spec handle_cast(Cast, State) -> tuple()
 %% @doc gen_server callback.
 handle_cast(_Req, State) ->
-    {noreply, State}.
+    {noreply, State, ?RELOAD_INTERVAL}.
 
 %% @spec handle_info(Info, State) -> tuple()
 %% @doc gen_server callback.
-handle_info(doit, State) ->
+handle_info(timeout, State) ->
     Now = stamp(),
     doit(State#state.last, Now),
-    {noreply, State#state{last = Now}};
+    {noreply, State#state{last = Now}, ?RELOAD_INTERVAL};
 handle_info(_Info, State) ->
-    {noreply, State}.
+    {noreply, State, ?RELOAD_INTERVAL}.
 
 %% @spec terminate(Reason, State) -> ok
 %% @doc gen_server termination callback.
-terminate(_Reason, State) ->
-    {ok, cancel} = timer:cancel(State#state.tref),
+terminate(_Reason, _State) ->
     ok.
 
 
 %% @spec code_change(_OldVsn, State, _Extra) -> State
 %% @doc gen_server code_change callback (trivial).
+code_change(_Vsn, {state, Stamp, _}, _Extra) ->
+    {ok, #state{last=Stamp}};
 code_change(_Vsn, State, _Extra) ->
     {ok, State}.
 
