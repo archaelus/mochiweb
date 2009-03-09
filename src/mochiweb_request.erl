@@ -504,7 +504,9 @@ serve_file(Path, DocRoot, ExtraHeaders) ->
                         _ ->
                             case file:open(File, [raw, binary]) of
                                 {ok, IoDevice} ->
-                                    ContentType = mochiweb_util:guess_mime(File),
+                                    ContentType = proplists:get_value("Content-Type",
+                                                                      ExtraHeaders,
+                                                                      mochiweb_util:guess_mime(File)),
                                     Res = ok({ContentType,
                                               [{"last-modified", LastModified}
                                                | ExtraHeaders],
