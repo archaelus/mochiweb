@@ -17,6 +17,8 @@ to_hex(0) ->
     "0";
 to_hex(I) when is_integer(I), I > 0 ->
     to_hex_int(I, []);
+to_hex(Bin) when is_binary(Bin) ->
+    to_hex(Bin, []);
 to_hex(B) ->
     to_hex(iolist_to_binary(B), []).
 

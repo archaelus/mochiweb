@@ -14,9 +14,10 @@ skelcopy(DestDir, Name) ->
                    N + 1
            end,
     skelcopy(src(), DestDir, Name, LDst),
-    ok = file:make_symlink(
-        filename:join(filename:dirname(code:which(?MODULE)), ".."),
-        filename:join([DestDir, Name, "deps", "mochiweb-src"])).
+    Mochiweb = filename:absname(resolve(filename:join(filename:dirname(code:which(?MODULE)), ".."))),
+    Target = filename:join([DestDir, Name, "lib", "mochiweb"]),
+    ok = file:make_symlink(Mochiweb,Target).
+    
 
 %% Internal API
 
@@ -75,6 +76,20 @@ ensuredir(Dir) ->
         E ->
             E
     end.
+
+resolve(Path) ->
+    filename:join(resolve(filename:split(Path), [])).
+
+resolve([], Acc) ->
+    lists:reverse(Acc);
+resolve(["." | Rest], Acc) ->
+    resolve(Rest, Acc);
+resolve([".." | Rest], [_ | Acc]) ->
+    resolve(Rest, Acc);
+resolve([".." | Rest], []) ->
+    resolve(Rest, []);
+resolve([This | Rest], Acc) ->
+    resolve(Rest, [This | Acc]).
 
 %%
 %% Tests

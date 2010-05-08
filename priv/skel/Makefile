@@ -1,20 +1,29 @@
-all: ebin/
-	(cd src;$(MAKE) all)
+VSN          := 1.3
+ERL          ?= erl
+EBIN_DIRS    := $(wildcard lib/*/ebin)
+APP          := mochiweb
 
-edoc:
-	(cd src;$(MAKE) edoc)
+all: erl ebin/$(APP).app
 
-test:
-	(cd src;$(MAKE) test)
+erl: ebin lib
+	@$(ERL) -pa $(EBIN_DIRS) -noinput +B \
+	  -eval 'case make:all() of up_to_date -> halt(0); error -> halt(1) end.'
 
-clean:
-	(cd src;$(MAKE) clean)
+docs:
+	@erl -noshell -run edoc_run application '$(APP)' '"."' '[]'
 
-clean_plt:
-	(cd src;$(MAKE) clean_plt)
+clean: 
+	@echo "removing:"
+	@rm -fv ebin/*.beam ebin/*.app
 
-dialyzer:
-	(cd src;$(MAKE) dialyzer)
+ebin/$(APP).app: src/$(APP).app
+	@cp -v src/$(APP).app $@
 
-ebin/:
-	@mkdir -p ebin
+ebin:
+	@mkdir ebin
+
+lib:
+	@mkdir lib
+
+dialyzer: erl
+	@dialyzer -c ebin

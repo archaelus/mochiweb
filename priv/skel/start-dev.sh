@@ -1,4 +1,9 @@
 #!/bin/sh
 cd `dirname $0`
-make
-exec erl -pa $PWD/ebin $PWD/deps/*/ebin -boot start_sasl -s reloader -s skel
+exec erl +Bc +K true -smp auto \
+    -pa $PWD/ebin $PWD/lib/*/ebin \
+    -boot start_sasl \
+    -name skel \
+    -s reloader \
+    -config conf/skel \
+    -s skel
